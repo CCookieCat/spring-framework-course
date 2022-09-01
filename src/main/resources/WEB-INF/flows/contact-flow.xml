@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+    <!-- jsp-form commandName="message" with class of Message -->
+    <var name="message" class="com.ccat.springtest.dao.Message"/>
+
+    <view-state id="showContactForm" model="message">
+        <!-- Action when entering the state: -->
+        <on-entry>
+            <!-- Set username property in Message-Bean in model: -->
+            <set name="message.username" value="requestParameters.uid"/>
+
+            <!-- use RequestScope to retain Variable only for the request, delete after response -->
+            <set name="requestScope.fromUser" value="usersService.getUser(currentUser?.name)"/>
+            <!-- use flowScope to retain value across the entire flow -->
+            <set name="flowScope.fromName" value="fromUser?.name"/>
+            <set name="flowScope.fromEmail" value="fromUser?.email"/>
+        </on-entry>
+        <!-- matches contact.jsp _eventId: -->
+        <transition on="send" to="sendMessage"/>
+    </view-state>
+
+    <action-state id="sendMessage">
+        <!-- SPEL: Call usersService-Bean method(var message ^)-->
+        <evaluate expression="usersService.sendMessage(message)"/>
+        <!-- transition to next state after code-execution -->
+        <transition to="messageSent"/>
+    </action-state>
+
+    <view-state id="messageSent">
+    </view-state>
+</flow>

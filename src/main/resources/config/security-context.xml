@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+    <!-- CONTROL URL -->
+    <security:http>
+        <security:intercept-url pattern="/admin" access="hasRole('ROLE_ADMIN')" />
+        <security:intercept-url pattern="/createoffer" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/docreate" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/offercreated" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/offerdeleted" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/getmessages" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/messages" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/sendmessage" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/" access="permitAll"/>
+        <security:intercept-url pattern="/loggedout" access="permitAll"/>
+        <security:intercept-url pattern="/denied" access="permitAll"/>
+        <security:intercept-url pattern="/message" access="permitAll"/>
+        <security:intercept-url pattern="/newaccount" access="permitAll"/>
+        <security:intercept-url pattern="/createaccount" access="permitAll"/>
+        <security:intercept-url pattern="/accountcreated" access="permitAll"/>
+        <security:intercept-url pattern="/static/**" access="permitAll"/>
+        <security:intercept-url pattern="/login" access="permitAll"/>
+        <security:intercept-url pattern="/**" access="denyAll"/>
+        <security:logout logout-success-url="/loggedout"/>
+        <security:form-login login-page="/login" authentication-failure-url="/login?error=true"/>
+<!--        Custom Access denied page: -->
+        <security:access-denied-handler error-page="/denied" />
+<!--        Session Settings: (ref has to correspond to userService-id) -->
+        <security:remember-me key="offersAppKey" user-service-ref="jdbcUserService" />
+    </security:http>
+
+    <!-- USER CREDENTIALS: -->
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:jdbc-user-service data-source-ref="dataSource"
+                    id="jdbcUserService"
+                    authorities-by-username-query='SELECT username, authority FROM users WHERE BINARY username=?'
+                    users-by-username-query='SELECT username, password, enabled FROM users WHERE BINARY username=?'/>
+<!--            Password Encrypting for Login input: -->
+            <security:password-encoder ref="passwordEncoder" />
+        </security:authentication-provider>
+<!--        <security:authentication-provider>-->
+<!--            <security:user-service>-->
+<!--                <security:user name="admin" password="admin" authorities="ROLE_ADMIN"/>-->
+<!--            </security:user-service>-->
+<!--        </security:authentication-provider>-->
+    </security:authentication-manager>
+
+    <!-- Method level security:-->
+    <security:global-method-security secured-annotations="enabled"/>
+
+    <!-- Password Encoding: -->
+    <bean id="passwordEncoder"
+          class="org.springframework.security.crypto.password.StandardPasswordEncoder">
+    </bean>
+</beans>
